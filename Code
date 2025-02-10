@@ -1,0 +1,230 @@
+CREATE DATABASE movie;
+USE movie;
+## Movies Table
+CREATE TABLE movies (
+    movie_id INT PRIMARY KEY,
+    movie_name VARCHAR(50),
+    movie_language VARCHAR(20),
+    release_date DATE,
+    release_country VARCHAR(20)
+);
+## Actors Table
+CREATE TABLE actors (
+    actor_id INT PRIMARY KEY,
+    actor_firstname VARCHAR(20),
+    actor_lastname VARCHAR(20),
+    actor_gender CHAR(1)
+);
+## Movie-Actors Junction Table (Handles Many-to-Many)
+CREATE TABLE movie_actors (
+    movie_id INT,
+    actor_id INT,
+    FOREIGN KEY (movie_id) REFERENCES movies(movie_id) ON DELETE CASCADE,
+    FOREIGN KEY (actor_id) REFERENCES actors(actor_id) ON DELETE CASCADE,
+    PRIMARY KEY (movie_id, actor_id)
+);
+## Actresses Table
+CREATE TABLE actresses (
+    actress_id INT PRIMARY KEY,
+    actress_firstname VARCHAR(20),
+    actress_lastname VARCHAR(20),
+    actress_gender CHAR(1)
+);
+## Movie-Actresses Junction Table (Handles Many-to-Many)
+CREATE TABLE movie_actresses (
+    movie_id INT,
+    actress_id INT,
+    FOREIGN KEY (movie_id) REFERENCES movies(movie_id) ON DELETE CASCADE,
+    FOREIGN KEY (actress_id) REFERENCES actresses(actress_id) ON DELETE CASCADE,
+    PRIMARY KEY (movie_id, actress_id)
+);
+## Directors Table
+CREATE TABLE directors (
+    director_id INT PRIMARY KEY,
+    director_firstname VARCHAR(20),
+    director_lastname VARCHAR(20),
+    movie_id INT,
+    FOREIGN KEY (movie_id) REFERENCES movies(movie_id) ON DELETE CASCADE
+);
+## Create a Many-to-Many Relationship for Directors and Movies
+CREATE TABLE movie_directors (
+    movie_id INT,
+    director_id INT,
+    FOREIGN KEY (movie_id) REFERENCES movies(movie_id) ON DELETE CASCADE,
+    FOREIGN KEY (director_id) REFERENCES directors(director_id) ON DELETE CASCADE,
+    PRIMARY KEY (movie_id, director_id)
+);
+## Reviews Table
+CREATE TABLE reviews (
+    review_id INT PRIMARY KEY,
+    movie_id INT,
+    rating DECIMAL(2,1),
+    total_ratings INT,
+    FOREIGN KEY (movie_id) REFERENCES movies(movie_id) ON DELETE CASCADE
+);
+## Genre Table
+CREATE TABLE genres (
+    genre_id INT PRIMARY KEY,
+    movie_id INT,
+    genre VARCHAR(20),
+    FOREIGN KEY (movie_id) REFERENCES movies(movie_id) ON DELETE CASCADE
+);
+## Movie Collection Table
+CREATE TABLE movie_collection (
+    movie_id INT PRIMARY KEY,
+    collections VARCHAR(20),
+    days_run INT,
+    opening_day_revenue VARCHAR(20),
+    FOREIGN KEY (movie_id) REFERENCES movies(movie_id) ON DELETE CASCADE
+);
+## Insert Data into Movies
+INSERT INTO movies (movie_id, movie_name, movie_language, release_date, release_country)
+VALUES 
+    (1, '2.0', 'Tamil', '2018-11-29', 'India'),
+    (2, 'Jailer', 'Tamil', '2023-08-10', 'India'),
+    (3, 'Ponniyin Selvan: Part 1', 'Tamil', '2022-09-30', 'India'),
+    (4, 'Vikram', 'Tamil', '2022-06-03', 'India'),
+    (5, 'Bigil', 'Tamil', '2019-10-25', 'India');
+## Insert Data into Actors
+INSERT INTO actors (actor_id, actor_firstname, actor_lastname, actor_gender)
+VALUES 
+    (1, 'Rajinikanth', NULL, 'M'),
+    (2, 'Kamal', 'Haasan', 'M'),
+    (3, 'Vikram', NULL, 'M'),
+    (4, 'Vijay', NULL, 'M');
+## Assign Actors to Movies
+INSERT INTO movie_actors (movie_id, actor_id)
+VALUES 
+    (1, 1),
+    (2, 1),
+    (3, 3),
+    (4, 2),
+    (5, 4);
+## Insert Data into Actresses
+INSERT INTO actresses (actress_id, actress_firstname, actress_lastname, actress_gender)
+VALUES 
+    (1, 'Amy', 'Jackson', 'F'),
+    (2, 'Ramya', 'Krishnan', 'F'),
+    (3, 'Trisha', 'Krishnan', 'F'),
+    (4, 'Shivani', 'Narayanan', 'F'),
+    (5, 'Nayanthara', NULL, 'F');
+## Assign Actresses to Movies
+INSERT INTO movie_actresses (movie_id, actress_id)
+VALUES 
+    (1, 1),
+    (2, 2),
+    (3, 3),
+    (4, 4),
+    (5, 5);
+## Insert Data into Directors
+INSERT INTO directors (director_id, movie_id, director_firstname, director_lastname)
+VALUES 
+    (1, 1, 'S.', 'Shankar'),
+    (2, 2, 'Nelson', 'Dilipkumar'),
+    (3, 3, 'Mani', 'Ratnam'),
+    (4, 4, 'Lokesh', 'Kangaraj'),
+    (5, 5, 'Atlee', NULL);
+## Assign Directors to Movies (Using Junction Table)
+INSERT INTO movie_directors (movie_id, director_id)
+VALUES 
+    (1, 1),
+    (2, 2),
+    (3, 3),
+    (4, 4),
+    (5, 5);
+## Insert Data into Reviews
+INSERT INTO reviews (review_id, movie_id, rating, total_ratings)
+VALUES 
+    (1, 1, 8.0, 250000),
+    (2, 2, 7.9, 200000),
+    (3, 3, 8.1, 180000),
+    (4, 4, 8.4, 220000),
+    (5, 5, 7.5, 150000);
+## Insert Data into Movie Collection
+INSERT INTO movie_collection (movie_id, collections, days_run, opening_day_revenue)
+VALUES
+    (1, '800 crores', 100, '85 crores'),
+    (2, '650 crores', 75, '95 crores'),
+    (3, '500 crores', 90, '80 crores'),
+    (4, '450 crores', 100, '58 crores'),
+    (5, '300 crores', 85, '52 crores');
+COMMIT;
+## Insert Data into Genres
+INSERT INTO genres (genre_id, movie_id, genre)
+VALUES
+    (1, 1, 'Sci-Fi'),
+    (2, 1, 'Action'),
+    (3, 2, 'Action'),
+    (4, 2, 'Thriller'),
+    (5, 3, 'Historical'),
+    (6, 3, 'Drama'),
+    (7, 4, 'Action'),
+    (8, 4, 'Thriller'),
+    (9, 5, 'Sports'),
+    (10, 5, 'Drama');
+## Create View for Movie Details
+CREATE VIEW mov_det AS
+SELECT 
+    m.movie_id, 
+    m.movie_name, 
+    m.movie_language, 
+    mc.collections, 
+    mc.days_run, 
+    mc.opening_day_revenue 
+FROM movies m 
+LEFT JOIN movie_collection mc ON m.movie_id = mc.movie_id;
+## Stored Procedure: Get Movie Ratings
+DELIMITER $$
+CREATE PROCEDURE ratings_and_reviews(IN p_movie_id INT)
+BEGIN
+    SELECT 
+        m.movie_id,
+        m.movie_name,
+        g.genre,
+        IFNULL(AVG(r.rating), 'No ratings yet') AS avg_rating,
+        COUNT(r.review_id) AS total_reviews
+    FROM movies m
+    LEFT JOIN genres g ON m.movie_ID = g.movie_id
+    LEFT JOIN reviews r ON m.movie_ID = r.movie_id
+    WHERE p_movie_id IS NULL OR m.movie_id = p_movie_id
+    GROUP BY m.movie_id, m.movie_name, g.genre;
+END$$
+DELIMITER ;
+DELIMITER $$
+CREATE PROCEDURE GetMoviesByYear(IN release_year INT)
+BEGIN
+    SELECT 
+        movie_id, 
+        movie_name, 
+        movie_language, 
+        release_date
+    FROM movies
+    WHERE YEAR(release_date) = release_year;
+END $$
+DELIMITER $$
+
+CREATE PROCEDURE SearchMoviesByRating(IN min_rating DECIMAL(2,1))
+BEGIN
+    SELECT movie_id, movie_name 
+    FROM movies 
+    WHERE movie_id IN (
+        SELECT movie_id FROM reviews 
+        GROUP BY movie_id 
+        HAVING AVG(rating) >= min_rating
+    )
+    ORDER BY (SELECT AVG(rating) FROM reviews WHERE reviews.movie_id = movies.movie_id) DESC;
+END $$
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE SearchMoviesByGenre(IN genre_name VARCHAR(20))
+BEGIN
+    SELECT movie_id, movie_name 
+    FROM movies 
+    WHERE movie_id IN (
+        SELECT movie_id FROM genres 
+        WHERE genre LIKE CONCAT('%', genre_name, '%')
+    );
+END $$
+DELIMITER ;
